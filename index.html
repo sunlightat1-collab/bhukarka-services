@@ -24,7 +24,6 @@ function doPost(e) {
       return addServiceWithFile(data);
     }
     
-    // सामान्य रिक्वेस्ट सबमिशन के लिए
     var sheet = ss.getSheetByName("Requests");
     if (!sheet) {
       sheet = ss.insertSheet("Requests");
@@ -124,11 +123,9 @@ function addServiceWithFile(data) {
     sheet.appendRow(["Emoji", "Title", "ServiceName", "Fees", "Link", "Target", "Note", "InputField", "FileUrl"]);
   }
   
-  // Base64 फाइल को Google Drive में सेव करना
   var decodedBytes = Utilities.base64Decode(data.fileData);
   var blob = Utilities.newBlob(decodedBytes, '', data.fileName);
   
-  // ड्राइव फोल्डर (आप चाहें तो अपनी पसंद का फोल्डर आईडी दे सकते हैं, फिलहाल रूट में सेव होगा)
   var file = DriveApp.createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
   var fileUrl = file.getUrl();
