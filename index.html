@@ -94,12 +94,12 @@
         <h2>🖨️ BHUARKARKA SERVICES 🙏</h2>
     </header>
 
-    <div class="notice-bar" id="noticeText">लोड हो रहा है...</div>
+    <div class="notice-bar" id="noticeText">📢 🙏 BHUARKARKA SERVICES में आपका स्वागत है! सभी प्रकार के ऑनलाइन फॉर्म व प्रिंटिंग यहाँ उपलब्ध हैं।</div>
     <div><span class="status-badge" id="shopStatus">🟢 दुकान खुली है (ONLINE)</span></div>
 
     <h3 style="font-size: 16px; margin-bottom: 15px;">कृपया अपनी सेवा चुनें:</h3>
     
-    <!-- ग्रिड कंटेनर (बाएं से दाएं कार्ड्स) -->
+    <!-- ग्रिड कंटेनर (11 सर्विस कार्ड्स) -->
     <div class="services-container" id="servicesContainer">
         <!-- कार्ड्स यहाँ लोड होंगे -->
     </div>
@@ -170,6 +170,21 @@
         const ADMIN_PASSWORD = "7615";
         let logoutTimer = null;
 
+        // डिफ़ॉल्ट 11 स्कीमें (यदि गूगल शीट में न हों)
+        const defaultServices = [
+            { title: "SELF PRINT", fees: 0, emoji: "📄", note: "इसमें आवेदक फाइलें अपलोड कर सकता है।" },
+            { title: "मूल निवास प्रमाण पत्र", fees: 0, emoji: "📜", note: "सभी दस्तावेज़ लेकर नजदीकी ई-मित्र पर संपर्क करें।" },
+            { title: "जाति प्रमाण पत्र", fees: 0, emoji: "📑", note: "सभी दस्तावेज़ लेकर नजदीकी ई-मित्र पर संपर्क करें।" },
+            { title: "PAN CARD", fees: 200, emoji: "💳", note: "आवेदक का आधार कार्ड, 10वीं मार्कशीट जरूरी है।" },
+            { title: "PVC AADHAR", fees: 100, emoji: "🪪", note: "आवश्यक विवरण दर्ज करें।" },
+            { title: "VOTER CARD", fees: 100, emoji: "🗳️", note: "वोटर कार्ड हेतु आवश्यक दस्तावेज अपलोड करें।" },
+            { title: "FARMER ID", fees: 100, emoji: "🌽", note: "किसान आईडी विवरण।" },
+            { title: "SHRAMIK CARD", fees: 200, emoji: "👷", note: "श्रमिक कार्ड विवरण।" },
+            { title: "JAN AADHAAR", fees: 50, emoji: "🆔", note: "जन आधार नंबर।" },
+            { title: "JAN AADHAAR PVC", fees: 100, emoji: "🪪", note: "जन आधार PVC कार्ड विवरण।" },
+            { title: "AYUSHMAN CARD", fees: 100, emoji: "🏥", note: "आयुष्मान कार्ड विवरण।" }
+        ];
+
         async function loadData() {
             try {
                 let response = await fetch(API_URL + "?action=getData");
@@ -182,39 +197,54 @@
                 let container = document.getElementById("servicesContainer");
                 container.innerHTML = "";
                 
-                if(data.services) {
-                    data.services.forEach(service => {
-                        let card = document.createElement("div");
-                        card.className = "card";
-                        card.innerHTML = `
-                            <div class="emoji">${service.emoji || '📄'}</div>
-                            <div class="card-info">
-                                <h4>${service.title}</h4>
-                                <p>₹${service.fees}</p>
-                            </div>
-                        `;
-                        card.onclick = () => {
-                            if(service.fileUrl) {
-                                window.open(service.fileUrl, "_blank");
-                            } else if(service.link) {
-                                window.open(service.link, "_blank");
-                            } else {
-                                alert(service.note || "यह सेवा उपलब्ध है।");
-                            }
-                        };
-                        container.appendChild(card);
-                    });
-                }
+                let servicesList = (data.services && data.services.length > 0) ? data.services : defaultServices;
+
+                servicesList.forEach(service => {
+                    let card = document.createElement("div");
+                    card.className = "card";
+                    card.innerHTML = `
+                        <div class="emoji">${service.emoji || '📄'}</div>
+                        <div class="card-info">
+                            <h4>${service.title}</h4>
+                            <p>${service.fees > 0 ? '₹' + service.fees : 'FREE'}</p>
+                        </div>
+                    `;
+                    card.onclick = () => {
+                        if(service.fileUrl) {
+                            window.open(service.fileUrl, "_blank");
+                        } else if(service.link) {
+                            window.open(service.link, "_blank");
+                        } else {
+                            alert(service.note || "यह सेवा उपलब्ध है।");
+                        }
+                    };
+                    container.appendChild(card);
+                });
             } catch (error) {
                 console.error("Error loading data:", error);
-                document.getElementById("noticeText").innerText = "📢 डेटा लोड करने में त्रुटि। कृपया इंटरनेट कनेक्शन चेक करें।";
+                // यदि फेच में एरर आए तो डिफ़ॉल्ट 11 कार्ड्स दिखाएं
+                let container = document.getElementById("servicesContainer");
+                container.innerHTML = "";
+                defaultServices.forEach(service => {
+                    let card = document.createElement("div");
+                    card.className = "card";
+                    card.innerHTML = `
+                        <div class="emoji">${service.emoji}</div>
+                        <div class="card-info">
+                            <h4>${service.title}</h4>
+                            <p>${service.fees > 0 ? '₹' + service.fees : 'FREE'}</p>
+                        </div>
+                    `;
+                    card.onclick = () => alert(service.note);
+                    container.appendChild(card);
+                });
             }
         }
 
         function checkPassword() {
             let pass = prompt("कृपया एडमिन पासवर्ड दर्ज करें:");
             if (pass === ADMIN_PASSWORD) {
-                sessionStorage.setItem("isAdminLoggedIn", "true"); // सेशन में सेव करें
+                sessionStorage.setItem("isAdminLoggedIn", "true");
                 showAdminPanel();
             } else if (pass !== null) {
                 alert("गलत पासवर्ड! एक्सेस अस्वीकृत।");
@@ -229,13 +259,13 @@
             clearTimeout(logoutTimer);
             logoutTimer = setTimeout(() => {
                 adminLogout();
-                alert("समय समाप्त (Session Timeout)! सुरक्षा की दृष्टि से एडमिन पैनल ऑटोमैटिक बंद कर दिया गया है।");
+                alert("समय समाप्त (Session Timeout)! सुरक्षा की दृष्टि से एडमिन पैनल बंद कर दिया गया है।");
             }, 5 * 60 * 1000);
         }
 
         function adminLogout() {
             clearTimeout(logoutTimer);
-            sessionStorage.removeItem("isAdminLoggedIn"); // सेशन से हटाएं
+            sessionStorage.removeItem("isAdminLoggedIn");
             let panel = document.getElementById("adminPanel");
             panel.style.display = "none";
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -298,7 +328,6 @@
             }
         }
 
-        // पेज लोड होने पर चेक करें कि क्या एडमिन पहले से लॉगइन था
         window.onload = function() {
             loadData();
             if (sessionStorage.getItem("isAdminLoggedIn") === "true") {
