@@ -27,8 +27,10 @@
         /* एडमिन पैनल सेक्शन */
         .admin-section { background: #343a40; padding: 15px; margin-top: 30px; border-radius: 10px; text-align: left; max-width: 450px; margin-left: auto; margin-right: auto; box-sizing: border-box; }
         .admin-section input, .admin-section textarea, .admin-section select { width: 100%; padding: 8px; margin: 5px 0 12px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; font-size: 14px; color: #000; }
-        .btn { background: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 14px; }
+        .btn { background: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 14px; margin-top: 5px; }
         .btn:hover { background: #0056b3; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
     </style>
 </head>
 <body>
@@ -52,7 +54,11 @@
 
     <!-- एडमिन पैनल (शुरुआत में छिपा रहेगा) -->
     <div class="admin-section" id="adminPanel" style="display:none;">
-        <h3 style="margin-top:0; color:#ffc107;">🔒 एडमिन पैनल</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin:0; color:#ffc107;">🔒 एडमिन पैनल</h3>
+            <button class="btn btn-danger" style="width: auto; padding: 5px 12px; font-size: 12px;" onclick="adminLogout()">लॉगआउट (Logout)</button>
+        </div>
+        <hr style="margin: 15px 0; border-color: #555;">
         
         <label style="color:#fff;">होमपेज नोटिस अपडेट करें:</label>
         <textarea id="adminNotice" rows="2"></textarea>
@@ -66,7 +72,7 @@
 
         <hr style="margin: 20px 0; border-color: #555;">
 
-        <h4 style="margin-top:0; color:#fff;">➕ नया सर्विस कार्ड और प्रपत्र जोड़ें:</h4>
+        <h4 style="margin-top:0; color:#fff;">➕ नया सर्विस कार्ड और प्रपत्र जोड़ें:</h4>
         <label style="color:#fff;">इमोजी (Emoji):</label>
         <input type="text" id="addEmoji" placeholder="जैसे: 📄">
         
@@ -82,13 +88,13 @@
         <label style="color:#fff;">या एक्सटर्नल लिंक / URL (वैकल्पिक):</label>
         <input type="text" id="addLink" placeholder="https://...">
 
-        <button class="btn" style="background: #28a745; margin-top: 10px;" onclick="addNewService()">नया कार्ड जोड़ें</button>
+        <button class="btn" style="background: #28a745;" onclick="addNewService()">नया कार्ड जोड़ें</button>
     </div>
 
     <script>
-        // आपका नया यूआरएल यहाँ अपडेट कर दिया गया है
         const API_URL = "https://script.google.com/macros/s/AKfycbyvPw32Gc1Qz8Qkr_POUAcnjLhJUJy8ej5DWoz39eiWETIEjCrz-I21qQjUgsX5Gt4O/exec";
         const ADMIN_PASSWORD = "7615";
+        let logoutTimer = null;
 
         async function loadData() {
             try {
@@ -135,15 +141,26 @@
             let pass = prompt("कृपया एडमिन पासवर्ड दर्ज करें:");
             if (pass === ADMIN_PASSWORD) {
                 let panel = document.getElementById("adminPanel");
-                if (panel.style.display === "none") {
-                    panel.style.display = "block";
-                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                } else {
-                    panel.style.display = "none";
-                }
+                panel.style.display = "block";
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                
+                // 5 मिनट (300000 मिलीसेकंड) का ऑटो-लॉगआउट टाइमर शुरू करें
+                clearTimeout(logoutTimer);
+                logoutTimer = setTimeout(() => {
+                    adminLogout();
+                    alert("समय समाप्त (Session Timeout)! सुरक्षा की दृष्टि से एडमिन पैनल ऑटोमैटिक बंद कर दिया गया है।");
+                }, 5 * 60 * 1000);
+
             } else if (pass !== null) {
                 alert("गलत पासवर्ड! एक्सेस अस्वीकृत।");
             }
+        }
+
+        function adminLogout() {
+            clearTimeout(logoutTimer); // टाइमर क्लियर करें
+            let panel = document.getElementById("adminPanel");
+            panel.style.display = "none"; // पैनल छिपाएँ
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // पेज के ऊपर (सर्विस सेक्शन पर) ले जाएं
         }
 
         async function updateSettings() {
@@ -191,14 +208,14 @@
                         body: JSON.stringify(payload)
                     });
                     let result = await res.json();
-                    alert("नया सर्विस कार्ड और प्रपत्र सफलतापर्वक जुड़ गया!");
+                    alert("नया सर्विस कार्ड और प्रपत्र सफलतापर्वक जुड़ गया!");
                     location.reload();
                 };
             } else {
                 let url = `${API_URL}?action=addService&emoji=${encodeURIComponent(emoji)}&title=${encodeURIComponent(title)}&fees=${fees}&link=${encodeURIComponent(link)}`;
                 let res = await fetch(url);
                 let result = await res.json();
-                alert("नया सर्विस कार्ड सफलतापूर्वक जुड़ गया!");
+                alert("नया सर्विस कार्ड सफलतापूर्वक जुड़ गया!");
                 location.reload();
             }
         }
