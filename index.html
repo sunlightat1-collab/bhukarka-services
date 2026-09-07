@@ -6,8 +6,6 @@
     <title>BHUARKARKA SERVICES - स्मार्ट कियोस्क</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #5c6b73; margin: 0; padding: 15px; color: #fff; text-align: center; }
-        
-        /* कोने में एडमिन पैनल का डायरेक्ट लिंक */
         .admin-link { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.4); color: #fff; text-decoration: none; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 16px; z-index: 1000; transition: 0.3s; }
         .admin-link:hover { background: rgba(0,0,0,0.8); }
 
@@ -15,6 +13,15 @@
         .notice-bar { background: #ffcc00; color: #000; padding: 10px; font-weight: bold; border-radius: 5px; margin: 15px auto; width: 95%; max-width: 650px; font-size: 14px; }
         .status-badge { background: #28a745; padding: 5px 15px; border-radius: 20px; display: inline-block; font-weight: bold; margin-bottom: 20px; font-size: 14px; }
         
+        /* विज्ञापन और सोशल मीडिया बैनर बॉक्स (जब तक एडमिन न जोड़े, तब तक नहीं दिखेगा) */
+        .ad-banner { background: #fff; color: #333; max-width: 650px; margin: 0 auto 20px auto; padding: 15px; border-radius: 8px; box-shadow: 0 3px 6px rgba(0,0,0,0.3); text-align: left; display: none; }
+        .ad-banner img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 5px; margin-bottom: 10px; }
+        .social-icons { margin-top: 10px; display: flex; gap: 10px; }
+        .social-icons a { padding: 6px 12px; background: #007bff; color: #fff; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .social-icons a.yt { background: #ff0000; }
+        .social-icons a.ig { background: #e1306c; }
+        .social-icons a.fb { background: #1877f2; }
+
         /* सर्विस कार्ड्स ग्रिड लेआउट */
         .services-container { 
             display: grid; 
@@ -42,7 +49,7 @@
         .card h4 { margin: 0 0 3px 0; font-size: 14px; color: #333; }
         .card p { margin: 0; font-size: 12px; color: #28a745; font-weight: bold; }
 
-        /* सर्विस फॉर्म व्यू (क्लिक करने पर खुलने वाला पेज) */
+        /* सर्विस फॉर्म व्यू */
         .service-form-container {
             display: none;
             background: #fff;
@@ -55,7 +62,7 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.4);
         }
         .service-form-container h3 { margin-top: 0; color: #2c3e50; text-align: center; }
-        .info-box { background: #eef9ff; border: 1px solid #bce8f1; padding: 10px; border-radius: 5px; font-size: 13px; margin-bottom: 15px; color: #31708f; }
+        .info-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 12px; border-radius: 5px; font-size: 13px; margin-bottom: 15px; color: #856404; }
         .fee-box { padding: 10px; text-align: center; font-weight: bold; border-radius: 5px; margin-bottom: 12px; }
         .service-form-container label { font-size: 13px; font-weight: bold; display: block; margin-top: 10px; color: #333; }
         .service-form-container input, .service-form-container select, .service-form-container textarea {
@@ -68,7 +75,6 @@
 </head>
 <body>
 
-    <!-- कोने में एडमिन पैनल खोलने का डायरेक्ट लिंक -->
     <a href="admin.html" class="admin-link" title="Admin Panel">⚙️</a>
 
     <header>
@@ -78,18 +84,25 @@
     <div class="notice-bar" id="noticeText">📢 लोड हो रहा है...</div>
     <div><span class="status-badge" id="shopStatus">🟢 दुकान खुली है (ONLINE)</span></div>
 
-    <!-- होमपेज मुख्य गृह कंटेनर -->
+    <!-- विज्ञापन और सोशल मीडिया बैनर (यदि एडमिन जोड़ेगा तभी दिखेगा) -->
+    <div class="ad-banner" id="adBannerBox">
+        <img id="adImg" src="" alt="Shop Ad" style="display:none;">
+        <p id="adDescText" style="margin: 0; font-size: 13px; font-weight: bold;"></p>
+        <div class="social-icons" id="socialLinksBox"></div>
+    </div>
+
+    <!-- होमपेज मुख्य कंटेनर -->
     <div id="homeContainer">
-        <h3 style="font-size: 16px; margin-bottom: 15px;">कृपया अपनी सेवा चुनें:</h3>
+        <h3 style="font-size: 16px; margin-bottom: 15px;">कृपया अपनी सेवा चुनें (24x7 उपलब्ध):</h3>
         <div class="services-container" id="servicesContainer">
             <!-- कार्ड्स यहाँ लोड होंगे -->
         </div>
     </div>
 
-    <!-- क्लिक करने पर खुलने वाला सर्विस फॉर्म व्यू -->
+    <!-- सर्विस फॉर्म व्यू -->
     <div class="service-form-container" id="serviceFormView">
         <h3 id="formServiceTitle">सर्विस का नाम</h3>
-        <div class="info-box" id="formServiceNote" style="display:none;"></div>
+        <div class="info-box" id="formServiceNote"></div>
         <div id="formFeeBox"></div>
         <div id="formDownloadSection"></div>
 
@@ -106,7 +119,7 @@
             <label>जीमेल (Email):</label>
             <input type="text" id="custEmail" value="NA" placeholder="email@gmail.com">
 
-            <label id="extraLabelText">आवश्यक जानकारी / विवरण:</label>
+            <label>आवश्यक जानकारी / विवरण:</label>
             <input type="text" id="extraInfo" placeholder="विवरण दर्ज करें" required>
 
             <label>दस्तावेज / फाइल अपलोड करें:</label>
@@ -115,8 +128,8 @@
             <div id="paymentSection" style="display:none;">
                 <hr style="border:0; border-top:1px dashed #ccc; margin:15px 0;">
                 <div style="text-align:center;">
-                    <p style="font-size:12px; font-weight:bold; color:#555; margin:5px 0;">नीचे दिए गए QR कोड को स्कैन करके भुगतान करें:</p>
-                    <img id="upiQrImg" src="" alt="UPI QR Code" style="width:160px; height:160px; border:1px solid #ddd; padding:4px; border-radius:5px;">
+                    <p style="font-size:12px; font-weight:bold; color:#555; margin:5px 0;">QR कोड स्कैन करके भुगतान करें:</p>
+                    <img id="upiQrImg" src="" alt="UPI QR Code" style="width:150px; height:150px; border:1px solid #ddd; padding:4px; border-radius:5px;">
                     <p style="font-size:11px; color:#666; margin:4px 0;">UPI ID: <b>Q508475385@ybl</b></p>
                 </div>
                 <label>UPI ट्रांजैक्शन / UTR नंबर दर्ज करें:</label>
@@ -132,17 +145,17 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbyvPw32Gc1Qz8Qkr_POUAcnjLhJUJy8ej5DWoz39eiWETIEjCrz-I21qQjUgsX5Gt4O/exec";
 
         const defaultServices = [
-            { title: "SELF PRINT", fees: 0, emoji: "📄", note: "इसमें आवेदक JPG, JPEG, PDF जैसी फाइलें upload कर सकता है।" },
-            { title: "मूल निवास प्रमाण पत्र", fees: 0, emoji: "📜", note: "सभी दस्तावेज़ लेकर नजदीकी ई-मित्र पर संपर्क करें।" },
-            { title: "जाति प्रमाण पत्र", fees: 0, emoji: "📑", note: "सभी दस्तावेज़ लेकर नजदीकी ई-मित्र पर संपर्क करें।" },
-            { title: "PAN CARD", fees: 200, emoji: "💳", note: "आवेदक का आधार कार्ड, 10वीं मार्कशीट जरूरी है।" },
-            { title: "PVC AADHAR", fees: 100, emoji: "🪪", note: "आवश्यक विवरण दर्ज करें।" },
-            { title: "VOTER CARD", fees: 100, emoji: "🗳️", note: "वोटर कार्ड हेतु आवश्यक दस्तावेज अपलोड करें।" },
-            { title: "FARMER ID", fees: 100, emoji: "🌽", note: "किसान आईडी विवरण।" },
-            { title: "SHRAMIK CARD", fees: 200, emoji: "👷", note: "श्रमिक कार्ड विवरण।" },
-            { title: "JAN AADHAAR", fees: 50, emoji: "🆔", note: "जन आधार नंबर।" },
-            { title: "JAN AADHAAR PVC", fees: 100, emoji: "🪪", note: "जन आधार PVC कार्ड विवरण।" },
-            { title: "AYUSHMAN CARD", fees: 100, emoji: "🏥", note: "आयुष्मान कार्ड विवरण।" }
+            { title: "SELF PRINT", fees: 0, emoji: "📄", note: "जरूरी दस्तावेज: प्रिंट करने वाली फाइल (PDF/JPG)." },
+            { title: "मूल निवास प्रमाण पत्र", fees: 0, emoji: "📜", note: "जरूरी दस्तावेज: आधार कार्ड, जन आधार, राशन कार्ड और पुराना मूल निवास।" },
+            { title: "जाति प्रमाण पत्र", fees: 0, emoji: "📑", note: "जरूरी दस्तावेज: आधार कार्ड, स्व-घोषणा पत्र और मूल निवास।" },
+            { title: "PAN CARD", fees: 200, emoji: "💳", note: "जरूरी दस्तावेज: आधार कार्ड, पासपोर्ट साइज फोटो और मोबाइल नंबर।" },
+            { title: "PVC AADHAR", fees: 100, emoji: "🪪", note: "जरूरी दस्तावेज: आधार नंबर और रजिस्टर्ड मोबाइल नंबर।" },
+            { title: "VOTER CARD", fees: 100, emoji: "🗳️", note: "जरूरी दस्तावेज: पुराना वोटर कार्ड या आधार कार्ड।" },
+            { title: "FARMER ID", fees: 100, emoji: "🌽", note: "जरूरी दस्तावेज: खसरा-खतौनी, आधार कार्ड और बैंक पासबुक।" },
+            { title: "SHRAMIK CARD", fees: 200, emoji: "👷", note: "जरूरी दस्तावेज: जन आधार, बैंक पासबुक और काम करने का प्रमाण पत्र।" },
+            { title: "JAN AADHAAR", fees: 50, emoji: "🆔", note: "जरूरी दस्तावेज: सभी सदस्यों के आधार कार्ड।" },
+            { title: "JAN AADHAAR PVC", fees: 100, emoji: "🪪", note: "जरूरी दस्तावेज: जन आधार नंबर।" },
+            { title: "AYUSHMAN CARD", fees: 100, emoji: "🏥", note: "जरूरी दस्तावेज: आधार कार्ड और राशन कार्ड।" }
         ];
 
         async function loadData() {
@@ -152,6 +165,26 @@
                 
                 document.getElementById("noticeText").innerText = "📢 " + (data.notice || "स्वागत है!");
                 document.getElementById("shopStatus").innerText = data.status === "ONLINE" ? "🟢 दुकान खुली है (ONLINE)" : "🔴 दुकान बंद है (OFFLINE)";
+
+                // विज्ञापन और सोशल मीडिया बैनर दिखाना (यदि उपलब्ध हो)
+                if (data.ad && (data.ad.desc || data.ad.photoUrl || data.ad.youtube || data.ad.instagram || data.ad.facebook)) {
+                    let bannerBox = document.getElementById("adBannerBox");
+                    bannerBox.style.display = "block";
+                    
+                    let imgTag = document.getElementById("adImg");
+                    if(data.ad.photoUrl) {
+                        imgTag.src = data.ad.photoUrl;
+                        imgTag.style.display = "block";
+                    }
+
+                    document.getElementById("adDescText").innerText = data.ad.desc || "";
+
+                    let socialBox = document.getElementById("socialLinksBox");
+                    socialBox.innerHTML = "";
+                    if(data.ad.youtube) socialBox.innerHTML += `<a href="${data.ad.youtube}" target="_blank" class="yt">▶ YouTube</a>`;
+                    if(data.ad.instagram) socialBox.innerHTML += `<a href="${data.ad.instagram}" target="_blank" class="ig">📸 Instagram</a>`;
+                    if(data.ad.facebook) socialBox.innerHTML += `<a href="${data.ad.facebook}" target="_blank" class="fb">📘 Facebook</a>`;
+                }
 
                 let container = document.getElementById("servicesContainer");
                 container.innerHTML = "";
@@ -201,12 +234,7 @@
             document.getElementById("inputAmount").value = service.fees || 0;
 
             let noteBox = document.getElementById("formServiceNote");
-            if (service.note) {
-                noteBox.innerHTML = "<b>📌 निर्देश / जानकारी:</b> " + service.note;
-                noteBox.style.display = "block";
-            } else {
-                noteBox.style.display = "none";
-            }
+            noteBox.innerHTML = "<b>📌 जरूरी दस्तावेज व निर्देश:</b> " + (service.note || "आवश्यक दस्तावेज अपलोड करें।");
 
             let downloadSec = document.getElementById("formDownloadSection");
             if (service.fileUrl) {
@@ -225,7 +253,7 @@
                 feeBox.style.color = "#2e7d32";
                 feeBox.innerText = "देय फीस (Fee): ₹" + fees;
                 
-                document.getElementById("upiQrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa=Q508475385@ybl&pn=BHUARKARKA%20SERVICES&am=${fees}&cu=INR`;
+                document.getElementById("upiQrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=Q508475385@ybl&pn=BHUARKARKA%20SERVICES&am=${fees}&cu=INR`;
                 paymentSec.style.display = "block";
                 document.getElementById("utrNumber").required = true;
                 document.getElementById("submitBtnText").innerText = "🚀 भुगतान सत्यापित करें व फॉर्म जमा करें";
@@ -295,7 +323,7 @@
                         <div style="text-align:center; padding:20px;">
                             <h2 style="color:#28a745;">✅ आवेदन सफलतापूर्वक जमा हो गया!</h2>
                             <p style="font-size:14px; color:#333;">आपका डेटा और फाइलें सुरक्षित रूप से एडमिन पैनल तक पहुँच गई हैं।</p>
-                            <br><a href="index.html" style="display:inline-block; padding:10px 20px; background:#007BURL; color:white; text-decoration:none; border-radius:5px; font-weight:bold;">🏠 होम पेज पर जाएं</a>
+                            <br><a href="index.html" style="display:inline-block; padding:10px 20px; background:#007BFF; color:white; text-decoration:none; border-radius:5px; font-weight:bold;">🏠 होम पेज पर जाएं</a>
                         </div>
                     `;
                 } catch (err) {
