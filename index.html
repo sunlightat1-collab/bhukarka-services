@@ -1,160 +1,209 @@
-var ss = SpreadsheetApp.getActiveSpreadsheet();
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BHUARKARKA SERVICES - स्मार्ट कियोस्क</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #5c6b73; margin: 0; padding: 15px; color: #fff; text-align: center; }
+        
+        /* कोने में सीक्रेट एडमिन आइकन */
+        .admin-icon { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.3); color: #fff; border: none; border-radius: 50%; width: 35px; height: 35px; font-size: 16px; cursor: pointer; z-index: 1000; transition: 0.3s; }
+        .admin-icon:hover { background: rgba(0,0,0,0.7); }
 
-function doGet(e) {
-  var action = e.parameter ? e.parameter.action : "";
-  
-  if (action == "getData") {
-    return getData();
-  } else if (action == "updateSettings") {
-    return updateSettings(e.parameter.notice, e.parameter.status);
-  } else if (action == "addService") {
-    return addService(e.parameter);
-  } else if (action == "deleteService") {
-    return deleteService(e.parameter.title);
-  }
-  
-  return ContentService.createTextOutput(JSON.stringify({"status": "success", "message": "API is running"})).setMimeType(ContentService.MimeType.JSON);
-}
+        header h2 { background: #333; display: inline-block; padding: 10px 20px; border-radius: 8px; font-size: 20px; margin-top: 10px; }
+        .notice-bar { background: #ffcc00; color: #000; padding: 10px; font-weight: bold; border-radius: 5px; margin: 15px auto; width: 95%; max-width: 500px; font-size: 14px; }
+        .status-badge { background: #28a745; padding: 5px 15px; border-radius: 20px; display: inline-block; font-weight: bold; margin-bottom: 20px; font-size: 14px; }
+        
+        /* वर्टिकल फॉर्मेट (एक के नीचे एक कार्ड) */
+        .services-container { display: flex; flex-direction: column; gap: 12px; max-width: 450px; margin: 0 auto; }
+        .card { background: #fff; color: #000; padding: 15px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; align-items: center; text-align: left; transition: 0.3s; }
+        .card:hover { background: #f0f0f0; }
+        .card .emoji { font-size: 28px; margin-right: 15px; min-width: 40px; text-align: center; }
+        .card-info { flex-grow: 1; }
+        .card h4 { margin: 0 0 5px 0; font-size: 15px; color: #333; }
+        .card p { margin: 0; font-size: 13px; color: #28a745; font-weight: bold; }
 
-function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
+        /* एडमिन पैनल सेक्शन */
+        .admin-section { background: #343a40; padding: 15px; margin-top: 30px; border-radius: 10px; text-align: left; max-width: 450px; margin-left: auto; margin-right: auto; box-sizing: border-box; }
+        .admin-section input, .admin-section textarea, .admin-section select { width: 100%; padding: 8px; margin: 5px 0 12px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; font-size: 14px; color: #000; }
+        .btn { background: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 14px; }
+        .btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+
+    <!-- कोने में सीक्रेट एडमिन बटन -->
+    <button class="admin-icon" onclick="checkPassword()" title="Admin Login">⚙️</button>
+
+    <header>
+        <h2>🖨️ BHUARKARKA SERVICES 🙏</h2>
+    </header>
+
+    <div class="notice-bar" id="noticeText">लोड हो रहा है...</div>
+    <div><span class="status-badge" id="shopStatus">🟢 दुकान खुली है (ONLINE)</span></div>
+
+    <h3 style="font-size: 16px; margin-bottom: 15px;">कृपया अपनी सेवा चुनें:</h3>
     
-    if (data.action === "addServiceWithFile") {
-      return addServiceWithFile(data);
-    }
-    
-    var sheet = ss.getSheetByName("Requests");
-    if (!sheet) {
-      sheet = ss.insertSheet("Requests");
-      sheet.appendRow(["Timestamp", "Name", "Mobile", "Service", "Fees", "Details", "Status"]);
-    }
-    
-    sheet.appendRow([
-      new Date(),
-      data.name || "",
-      data.mobile || "",
-      data.service || "",
-      data.fees || "",
-      data.details || "",
-      "Pending"
-    ]);
-    
-    return ContentService.createTextOutput(JSON.stringify({"status": "success"})).setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": err.toString()})).setMimeType(ContentService.MimeType.JSON);
-  }
-}
+    <!-- वर्टिकल लिस्ट कंटेनर -->
+    <div class="services-container" id="servicesContainer">
+        <!-- कार्ड्स यहाँ वर्टिकल लोड होंगे -->
+    </div>
 
-function getData() {
-  var servicesSheet = ss.getSheetByName("Services");
-  var settingsSheet = ss.getSheetByName("Settings");
-  
-  if (!servicesSheet) {
-    servicesSheet = ss.insertSheet("Services");
-    servicesSheet.appendRow(["Emoji", "Title", "ServiceName", "Fees", "Link", "Target", "Note", "InputField", "FileUrl"]);
-  }
-  if (!settingsSheet) {
-    settingsSheet = ss.insertSheet("Settings");
-    settingsSheet.getRange(1, 1).setValue("BHUARKARKA SERVICES में आपका स्वागत है!");
-    settingsSheet.getRange(1, 2).setValue("ONLINE");
-  }
-  
-  var servicesData = [];
-  var sRows = servicesSheet.getDataRange().getValues();
-  for (var i = 1; i < sRows.length; i++) {
-    servicesData.push({
-      emoji: sRows[i][0],
-      title: sRows[i][1],
-      serviceName: sRows[i][2],
-      fees: sRows[i][3],
-      link: sRows[i][4],
-      target: sRows[i][5],
-      note: sRows[i][6],
-      inputField: sRows[i][7],
-      fileUrl: sRows[i][8] || ""
-    });
-  }
-  
-  var notice = settingsSheet.getRange(1, 1).getValue() || "स्वागत है!";
-  var shopStatus = settingsSheet.getRange(1, 2).getValue() || "ONLINE";
-  
-  var result = {
-    services: servicesData,
-    notice: notice,
-    status: shopStatus
-  };
-  
-  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
-}
+    <!-- एडमिन पैनल (शुरुआत में छिपा रहेगा) -->
+    <div class="admin-section" id="adminPanel" style="display:none;">
+        <h3 style="margin-top:0; color:#ffc107;">🔒 एडमिन पैनल</h3>
+        
+        <label style="color:#fff;">होमपेज नोटिस अपडेट करें:</label>
+        <textarea id="adminNotice" rows="2"></textarea>
+        
+        <label style="color:#fff;">दुकान की स्थिति (Status):</label>
+        <select id="adminStatus">
+            <option value="ONLINE">ONLINE (खुली है)</option>
+            <option value="OFFLINE">OFFLINE (बंद है)</option>
+        </select>
+        <button class="btn" onclick="updateSettings()">सेटिंग्स सेव करें</button>
 
-function updateSettings(notice, status) {
-  var sheet = ss.getSheetByName("Settings");
-  if (!sheet) sheet = ss.insertSheet("Settings");
-  if(notice) sheet.getRange(1, 1).setValue(notice);
-  if(status) sheet.getRange(1, 2).setValue(status);
-  return ContentService.createTextOutput(JSON.stringify({"status": "updated"})).setMimeType(ContentService.MimeType.JSON);
-}
+        <hr style="margin: 20px 0; border-color: #555;">
 
-function addService(params) {
-  var sheet = ss.getSheetByName("Services");
-  if (!sheet) {
-    sheet = ss.insertSheet("Services");
-    sheet.appendRow(["Emoji", "Title", "ServiceName", "Fees", "Link", "Target", "Note", "InputField", "FileUrl"]);
-  }
-  sheet.appendRow([
-    params.emoji || "",
-    params.title || "",
-    params.serviceName || "",
-    params.fees || "",
-    params.link || "",
-    params.target || "",
-    params.note || "",
-    params.inputField || "",
-    ""
-  ]);
-  return ContentService.createTextOutput(JSON.stringify({"status": "added"})).setMimeType(ContentService.MimeType.JSON);
-}
+        <h4 style="margin-top:0; color:#fff;">➕ नया सर्विस कार्ड और प्रपत्र जोड़ें:</h4>
+        <label style="color:#fff;">इमोजी (Emoji):</label>
+        <input type="text" id="addEmoji" placeholder="जैसे: 📄">
+        
+        <label style="color:#fff;">कार्ड टाइटल:</label>
+        <input type="text" id="addTitle" placeholder="जैसे: Form Fill-up">
+        
+        <label style="color:#fff;">फीस (₹):</label>
+        <input type="number" id="addFees" value="0">
+        
+        <label style="color:#fff;">फॉर्म / प्रपत्र अपलोड करें (PDF/Image):</label>
+        <input type="file" id="addFile" style="background:#fff;">
 
-function addServiceWithFile(data) {
-  var sheet = ss.getSheetByName("Services");
-  if (!sheet) {
-    sheet = ss.insertSheet("Services");
-    sheet.appendRow(["Emoji", "Title", "ServiceName", "Fees", "Link", "Target", "Note", "InputField", "FileUrl"]);
-  }
-  
-  var decodedBytes = Utilities.base64Decode(data.fileData);
-  var blob = Utilities.newBlob(decodedBytes, '', data.fileName);
-  
-  var file = DriveApp.createFile(blob);
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  var fileUrl = file.getUrl();
-  
-  sheet.appendRow([
-    data.emoji || "",
-    data.title || "",
-    "",
-    data.fees || "",
-    data.link || "",
-    "",
-    "",
-    "",
-    fileUrl
-  ]);
-  
-  return ContentService.createTextOutput(JSON.stringify({"status": "added_with_file", "fileUrl": fileUrl})).setMimeType(ContentService.MimeType.JSON);
-}
+        <label style="color:#fff;">या एक्सटर्नल लिंक / URL (वैकल्पिक):</label>
+        <input type="text" id="addLink" placeholder="https://...">
 
-function deleteService(title) {
-  var sheet = ss.getSheetByName("Services");
-  if (!sheet) return ContentService.createTextOutput(JSON.stringify({"status": "not found"})).setMimeType(ContentService.MimeType.JSON);
-  
-  var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) {
-    if (data[i][1] == title) {
-      sheet.deleteRow(i + 1);
-      break;
-    }
-  }
-  return ContentService.createTextOutput(JSON.stringify({"status": "deleted"})).setMimeType(ContentService.MimeType.JSON);
-}
+        <button class="btn" style="background: #28a745; margin-top: 10px;" onclick="addNewService()">नया कार्ड जोड़ें</button>
+    </div>
+
+    <script>
+        // आपका नया फिक्स किया गया वेब ऐप यूआरएल
+        const API_URL = "https://script.google.com/macros/s/AKfycbwCNWqoX7RtxutPjhVwocMQYsZPlAHIgJePWeCJuKyPyKNtgWIW4vr528sFRM5O4iw1/exec";
+        const ADMIN_PASSWORD = "7615"; // पासवर्ड सेट है
+
+        async function loadData() {
+            try {
+                let response = await fetch(API_URL + "?action=getData");
+                let data = await response.json();
+                
+                document.getElementById("noticeText").innerText = "📢 " + (data.notice || "स्वागत है!");
+                document.getElementById("adminNotice").value = data.notice || "";
+                document.getElementById("shopStatus").innerText = data.status === "ONLINE" ? "🟢 दुकान खुली है (ONLINE)" : "🔴 दुकान बंद है (OFFLINE)";
+
+                let container = document.getElementById("servicesContainer");
+                container.innerHTML = "";
+                
+                if(data.services) {
+                    data.services.forEach(service => {
+                        let card = document.createElement("div");
+                        card.className = "card";
+                        card.innerHTML = `
+                            <div class="emoji">${service.emoji || '📄'}</div>
+                            <div class="card-info">
+                                <h4>${service.title}</h4>
+                                <p>₹${service.fees}</p>
+                            </div>
+                        `;
+                        card.onclick = () => {
+                            if(service.fileUrl) {
+                                window.open(service.fileUrl, "_blank");
+                            } else if(service.link) {
+                                window.open(service.link, "_blank");
+                            } else {
+                                alert(service.note || "यह सेवा उपलब्ध है।");
+                            }
+                        };
+                        container.appendChild(card);
+                    });
+                }
+            } catch (error) {
+                console.error("Error loading data:", error);
+                document.getElementById("noticeText").innerText = "📢 डेटा लोड करने में त्रुटि। कृपया इंटरनेट कनेक्शन चेक करें।";
+            }
+        }
+
+        function checkPassword() {
+            let pass = prompt("कृपया एडमिन पासवर्ड दर्ज करें:");
+            if (pass === ADMIN_PASSWORD) {
+                let panel = document.getElementById("adminPanel");
+                if (panel.style.display === "none") {
+                    panel.style.display = "block";
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                } else {
+                    panel.style.display = "none";
+                }
+            } else if (pass !== null) {
+                alert("गलत पासवर्ड! एक्सेस अस्वीकृत।");
+            }
+        }
+
+        async function updateSettings() {
+            let notice = document.getElementById("adminNotice").value;
+            let status = document.getElementById("adminStatus").value;
+            let url = `${API_URL}?action=updateSettings&notice=${encodeURIComponent(notice)}&status=${status}`;
+            
+            let res = await fetch(url);
+            let result = await res.json();
+            alert("सेटिंग्स अपडेट हो गई!");
+            loadData();
+        }
+
+        async function addNewService() {
+            let emoji = document.getElementById("addEmoji").value;
+            let title = document.getElementById("addTitle").value;
+            let fees = document.getElementById("addFees").value;
+            let link = document.getElementById("addLink").value;
+            let fileInput = document.getElementById("addFile");
+
+            if (!title) {
+                alert("कृपया कार्ड का टाइटल भरें!");
+                return;
+            }
+
+            if (fileInput.files.length > 0) {
+                let file = fileInput.files[0];
+                let reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = async function () {
+                    let base64Data = reader.result.split(',')[1];
+                    let payload = {
+                        action: "addServiceWithFile",
+                        emoji: emoji,
+                        title: title,
+                        fees: fees,
+                        fileName: file.name,
+                        fileData: base64Data,
+                        link: link
+                    };
+                    
+                    alert("फाइल अपलोड हो रही है, कृपया प्रतीक्षा करें...");
+                    let res = await fetch(API_URL, {
+                        method: "POST",
+                        body: JSON.stringify(payload)
+                    });
+                    let result = await res.json();
+                    alert("नया सर्विस कार्ड और प्रपत्र सफलतापर्वक जुड़ गया!");
+                    location.reload();
+                };
+            } else {
+                let url = `${API_URL}?action=addService&emoji=${encodeURIComponent(emoji)}&title=${encodeURIComponent(title)}&fees=${fees}&link=${encodeURIComponent(link)}`;
+                let res = await fetch(url);
+                let result = await res.json();
+                alert("नया सर्विस कार्ड सफलतापूर्वक जुड़ गया!");
+                location.reload();
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
