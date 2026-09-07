@@ -15,7 +15,7 @@
         .card .emoji { font-size: 30px; margin-bottom: 10px; }
         .card h4 { margin: 5px 0; font-size: 14px; }
         .admin-section { background: #343a40; padding: 20px; margin-top: 40px; border-radius: 10px; text-align: left; max-width: 800px; margin-left: auto; margin-right: auto; }
-        .admin-section input, .admin-section textarea, .admin-section select { width: 100%; padding: 8px; margin: 5px 0 15px 0; border-radius: 5px; border: 1px solid #ccc; }
+        .admin-section input, .admin-section textarea, .admin-section select { width: 100%; padding: 8px; margin: 5px 0 15px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
         .btn { background: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .btn:hover { background: #0056b3; }
         .toggle-btn { background: #ffc107; color: #000; margin-bottom: 20px; }
@@ -30,7 +30,7 @@
     <div class="notice-bar" id="noticeText">लोड हो रहा है...</div>
     <div><span class="status-badge" id="shopStatus">🟢 दुकान खुली है (ONLINE)</span></div>
 
-    <button class="btn toggle-btn" onclick="toggleAdmin()">⚙️ एडमिन पैनल खोलें / बंद करें</button>
+    <button class="btn toggle-btn" onclick="checkPassword()">⚙️ एडमिन पैनल खोलें</button>
 
     <h3>कृपया अपनी सेवा चुनें:</h3>
     <div class="services-grid" id="servicesContainer">
@@ -70,7 +70,8 @@
     </div>
 
     <script>
-        const API_URL = "यहाँ_अपना_गूगल_ऐप_स्क्रिप्ट_यूआरएल_डालें"; // <--- यहाँ अपना वह यूआरएल पेस्ट करें
+        const API_URL = "यहाँ_अपना_गूगल_ऐप_स्क्रिप्ट_यूआरएल_डालें"; // <--- यहाँ अपना सही यूआरएल डालें
+        const ADMIN_PASSWORD = "1234"; // <--- यहाँ अपना मनपसंद पासवर्ड सेट कर सकते हैं
 
         async function loadData() {
             try {
@@ -78,7 +79,7 @@
                 let data = await response.json();
                 
                 document.getElementById("noticeText").innerText = "📢 " + data.notice;
-                document.getElementById("adminNotice.value") = data.notice;
+                document.getElementById("adminNotice").value = data.notice;
                 document.getElementById("shopStatus").innerText = data.status === "ONLINE" ? "🟢 दुकान खुली है (ONLINE)" : "🔴 दुकान बंद है (OFFLINE)";
 
                 let container = document.getElementById("servicesContainer");
@@ -108,9 +109,19 @@
             }
         }
 
-        function toggleAdmin() {
-            let panel = document.getElementById("adminPanel");
-            panel.style.display = panel.style.display === "none" ? "block" : "none";
+        function checkPassword() {
+            let pass = prompt("कृपया एडमिन पासवर्ड दर्ज करें:");
+            if (pass === ADMIN_PASSWORD) {
+                let panel = document.getElementById("adminPanel");
+                if (panel.style.display === "none") {
+                    panel.style.display = "block";
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                } else {
+                    panel.style.display = "none";
+                }
+            } else if (pass !== null) {
+                alert("गलत पासवर्ड! एक्सेस अस्वीकृत।");
+            }
         }
 
         async function updateSettings() {
