@@ -42,7 +42,7 @@
         .card h4 { margin: 0 0 3px 0; font-size: 14px; color: #333; }
         .card p { margin: 0; font-size: 12px; color: #28a745; font-weight: bold; }
 
-        /* एडमिन पैनल - अब चौड़ा और ग्रिड लेआउट में */
+        /* एडमिन पैनल */
         .admin-section { 
             background: #343a40; 
             padding: 20px; 
@@ -55,7 +55,6 @@
             box-sizing: border-box; 
         }
         
-        /* एडमिन के अंदर फॉर्म फील्ड्स को बाएं से दाएं (2 कॉलम) व्यवस्थित करने के लिए */
         .admin-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -215,23 +214,28 @@
         function checkPassword() {
             let pass = prompt("कृपया एडमिन पासवर्ड दर्ज करें:");
             if (pass === ADMIN_PASSWORD) {
-                let panel = document.getElementById("adminPanel");
-                panel.style.display = "block";
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                
-                clearTimeout(logoutTimer);
-                logoutTimer = setTimeout(() => {
-                    adminLogout();
-                    alert("समय समाप्त (Session Timeout)! सुरक्षा की दृष्टि से एडमिन पैनल ऑटोमैटिक बंद कर दिया गया है।");
-                }, 5 * 60 * 1000);
-
+                sessionStorage.setItem("isAdminLoggedIn", "true"); // सेशन में सेव करें
+                showAdminPanel();
             } else if (pass !== null) {
                 alert("गलत पासवर्ड! एक्सेस अस्वीकृत।");
             }
         }
 
+        function showAdminPanel() {
+            let panel = document.getElementById("adminPanel");
+            panel.style.display = "block";
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            
+            clearTimeout(logoutTimer);
+            logoutTimer = setTimeout(() => {
+                adminLogout();
+                alert("समय समाप्त (Session Timeout)! सुरक्षा की दृष्टि से एडमिन पैनल ऑटोमैटिक बंद कर दिया गया है।");
+            }, 5 * 60 * 1000);
+        }
+
         function adminLogout() {
             clearTimeout(logoutTimer);
+            sessionStorage.removeItem("isAdminLoggedIn"); // सेशन से हटाएं
             let panel = document.getElementById("adminPanel");
             panel.style.display = "none";
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -252,7 +256,7 @@
             let emoji = document.getElementById("addEmoji").value;
             let title = document.getElementById("addTitle").value;
             let fees = document.getElementById("addFees").value;
-            let link = document.getElementById("addLink", "").value;
+            let link = document.getElementById("addLink").value;
             let fileInput = document.getElementById("addFile");
 
             if (!title) {
@@ -294,7 +298,13 @@
             }
         }
 
-        loadData();
+        // पेज लोड होने पर चेक करें कि क्या एडमिन पहले से लॉगइन था
+        window.onload = function() {
+            loadData();
+            if (sessionStorage.getItem("isAdminLoggedIn") === "true") {
+                showAdminPanel();
+            }
+        };
     </script>
 </body>
 </html>
