@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BHUARKARKA SERVICES - स्मार्ट कियोस्क</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #5c6b73; margin: 0; padding: 20px; color: #fff; text-align: center; }
+        header h2 { background: #333; display: inline-block; padding: 10px 20px; border-radius: 8px; }
+        .notice-bar { background: #ffcc00; color: #000; padding: 10px; font-weight: bold; border-radius: 5px; margin: 15px auto; width: 80%; }
+        .status-badge { background: #28a745; padding: 5px 15px; border-radius: 20px; display: inline-block; font-weight: bold; margin-bottom: 20px; }
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; max-width: 900px; margin: auto; }
+        .card { background: #fff; color: #000; padding: 20px; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); background: #f0f0f0; }
+        .card .emoji { font-size: 30px; margin-bottom: 10px; }
+        .card h4 { margin: 5px 0; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h2>🖨️ BHUARKARKA SERVICES 🙏</h2>
+    </header>
+
+    <div class="notice-bar" id="noticeText">लोड हो रहा है...</div>
+    <div><span class="status-badge" id="shopStatus">🟢 दुकान खुली है (ONLINE)</span></div>
+
+    <h3>कृपया अपनी सेवा चुनें:</h3>
+    <div class="services-grid" id="servicesContainer">
+        <!-- डायनेमिक कार्ड्स यहाँ लोड होंगे -->
+    </div>
+
+    <script>
+        const API_URL = "YOUR_WEB_APP_URL"; // यहाँ अपना Google Apps Script वाला URL डालें
+
+        async function loadData() {
+            try {
+                let response = await fetch(API_URL + "?action=getData");
+                let data = await response.json();
+                
+                // नोटिस और स्टेटस अपडेट करें
+                document.getElementById("noticeText").innerText = "📢 " + data.notice;
+                document.getElementById("shopStatus").innerText = data.status === "ONLINE" ? "🟢 दुकान खुली है (ONLINE)" : "🔴 दुकान बंद है (OFFLINE)";
+
+                // सर्विसेज कार्ड्स रेंडर करें
+                let container = document.getElementById("servicesContainer");
+                container.innerHTML = "";
+                
+                data.services.forEach(service => {
+                    let card = document.createElement("div");
+                    card.className = "card";
+                    card.innerHTML = `
+                        <div class="emoji">${service.emoji || '📄'}</div>
+                        <h4>${service.title}</h4>
+                        <p style="font-size:12px; color:green;"><b>₹${service.fees}</b></p>
+                    `;
+                    card.onclick = () => {
+                        if(service.link) {
+                            window.open(service.link, service.target || "_blank");
+                        } else {
+                            alert(service.note || "यह सेवा उपलब्ध है।");
+                        }
+                    };
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("Error loading data:", error);
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
