@@ -7,9 +7,9 @@
     <style>
         body { font-family: Arial, sans-serif; background-color: #5c6b73; margin: 0; padding: 15px; color: #fff; text-align: center; }
         
-        /* कोने में सीक्रेट एडमिन आइकन */
-        .admin-icon { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.3); color: #fff; border: none; border-radius: 50%; width: 35px; height: 35px; font-size: 16px; cursor: pointer; z-index: 1000; transition: 0.3s; }
-        .admin-icon:hover { background: rgba(0,0,0,0.7); }
+        /* कोने में एडमिन पैनल का डायरेक्ट लिंक */
+        .admin-link { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.4); color: #fff; text-decoration: none; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 16px; z-index: 1000; transition: 0.3s; }
+        .admin-link:hover { background: rgba(0,0,0,0.8); }
 
         header h2 { background: #333; display: inline-block; padding: 10px 20px; border-radius: 8px; font-size: 20px; margin-top: 10px; }
         .notice-bar { background: #ffcc00; color: #000; padding: 10px; font-weight: bold; border-radius: 5px; margin: 15px auto; width: 95%; max-width: 650px; font-size: 14px; }
@@ -42,137 +42,97 @@
         .card h4 { margin: 0 0 3px 0; font-size: 14px; color: #333; }
         .card p { margin: 0; font-size: 12px; color: #28a745; font-weight: bold; }
 
-        /* एडमिन पैनल */
-        .admin-section { 
-            background: #343a40; 
-            padding: 20px; 
-            margin-top: 30px; 
-            border-radius: 10px; 
-            text-align: left; 
-            max-width: 650px; 
-            margin-left: auto; 
-            margin-right: auto; 
-            box-sizing: border-box; 
+        /* सर्विस फॉर्म व्यू (क्लिक करने पर खुलने वाला पेज) */
+        .service-form-container {
+            display: none;
+            background: #fff;
+            color: #333;
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
         }
-        
-        .admin-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        .service-form-container h3 { margin-top: 0; color: #2c3e50; text-align: center; }
+        .info-box { background: #eef9ff; border: 1px solid #bce8f1; padding: 10px; border-radius: 5px; font-size: 13px; margin-bottom: 15px; color: #31708f; }
+        .fee-box { padding: 10px; text-align: center; font-weight: bold; border-radius: 5px; margin-bottom: 12px; }
+        .service-form-container label { font-size: 13px; font-weight: bold; display: block; margin-top: 10px; color: #333; }
+        .service-form-container input, .service-form-container select, .service-form-container textarea {
+            width: 100%; padding: 9px; margin-top: 4px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 13px;
         }
-        .full-width {
-            grid-column: span 2;
-        }
-
-        .admin-section input, .admin-section textarea, .admin-section select { 
-            width: 100%; 
-            padding: 8px; 
-            margin: 5px 0 10px 0; 
-            border-radius: 5px; 
-            border: 1px solid #ccc; 
-            box-sizing: border-box; 
-            font-size: 13px; 
-            color: #000; 
-        }
-        .admin-section label {
-            font-size: 12px;
-            font-weight: bold;
-            color: #ffc107;
-        }
-        .btn { background: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 14px; margin-top: 5px; }
-        .btn:hover { background: #0056b3; }
-        .btn-danger { background: #dc3545; }
-        .btn-danger:hover { background: #c82333; }
+        .btn-submit { background: #28a745; color: white; border: none; padding: 11px; width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 15px; font-size: 15px; }
+        .btn-submit:hover { background: #218838; }
+        .btn-back { display: block; text-align: center; margin-top: 15px; color: #007BFF; text-decoration: none; font-weight: bold; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <!-- कोने में सीक्रेट एडमिन बटन -->
-    <button class="admin-icon" onclick="checkPassword()" title="Admin Login">⚙️</button>
+    <!-- कोने में एडमिन पैनल खोलने का डायरेक्ट लिंक -->
+    <a href="admin.html" class="admin-link" title="Admin Panel">⚙️</a>
 
     <header>
         <h2>🖨️ BHUARKARKA SERVICES 🙏</h2>
     </header>
 
-    <div class="notice-bar" id="noticeText">📢 🙏 BHUARKARKA SERVICES में आपका स्वागत है! सभी प्रकार के ऑनलाइन फॉर्म व प्रिंटिंग यहाँ उपलब्ध हैं।</div>
+    <div class="notice-bar" id="noticeText">📢 लोड हो रहा है...</div>
     <div><span class="status-badge" id="shopStatus">🟢 दुकान खुली है (ONLINE)</span></div>
 
-    <h3 style="font-size: 16px; margin-bottom: 15px;">कृपया अपनी सेवा चुनें:</h3>
-    
-    <!-- ग्रिड कंटेनर (11 सर्विस कार्ड्स) -->
-    <div class="services-container" id="servicesContainer">
-        <!-- कार्ड्स यहाँ लोड होंगे -->
+    <!-- होमपेज मुख्य गृह कंटेनर -->
+    <div id="homeContainer">
+        <h3 style="font-size: 16px; margin-bottom: 15px;">कृपया अपनी सेवा चुनें:</h3>
+        <div class="services-container" id="servicesContainer">
+            <!-- कार्ड्स यहाँ लोड होंगे -->
+        </div>
     </div>
 
-    <!-- एडमिन पैनल -->
-    <div class="admin-section" id="adminPanel" style="display:none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="margin:0; color:#ffc107;">🔒 एडमिन पैनल</h3>
-            <button class="btn btn-danger" style="width: auto; padding: 5px 12px; font-size: 12px;" onclick="adminLogout()">लॉगआउट (Logout)</button>
-        </div>
-        
-        <div class="admin-grid">
-            <div class="full-width">
-                <label>होमपेज नोटिस अपडेट करें:</label>
-                <textarea id="adminNotice" rows="2"></textarea>
-            </div>
-            
-            <div>
-                <label>दुकान की स्थिति (Status):</label>
-                <select id="adminStatus">
-                    <option value="ONLINE">ONLINE (खुली है)</option>
-                    <option value="OFFLINE">OFFLINE (बंद है)</option>
-                </select>
-            </div>
-            <div style="display: flex; align-items: flex-end;">
-                <button class="btn" style="height: 38px; margin-bottom: 10px;" onclick="updateSettings()">सेटिंग्स सेव करें</button>
-            </div>
-        </div>
+    <!-- क्लिक करने पर खुलने वाला सर्विस फॉर्म व्यू -->
+    <div class="service-form-container" id="serviceFormView">
+        <h3 id="formServiceTitle">सर्विस का नाम</h3>
+        <div class="info-box" id="formServiceNote" style="display:none;"></div>
+        <div id="formFeeBox"></div>
+        <div id="formDownloadSection"></div>
 
-        <hr style="margin: 20px 0; border-color: #555;">
+        <form id="dynamicSubmitForm" onsubmit="submitServiceForm(event)">
+            <input type="hidden" id="inputServiceType">
+            <input type="hidden" id="inputAmount">
 
-        <h4 style="margin-top:0; color:#fff; font-size: 15px;">➕ नया सर्विस कार्ड और प्रपत्र जोड़ें:</h4>
-        
-        <div class="admin-grid">
-            <div>
-                <label>इमोजी (Emoji):</label>
-                <input type="text" id="addEmoji" placeholder="जैसे: 📄">
-            </div>
-            
-            <div>
-                <label>फीस (₹):</label>
-                <input type="number" id="addFees" value="0">
-            </div>
-            
-            <div class="full-width">
-                <label>कार्ड टाइटल:</label>
-                <input type="text" id="addTitle" placeholder="जैसे: Form Fill-up">
-            </div>
-            
-            <div class="full-width">
-                <label>फॉर्म / प्रपत्र अपलोड करें (PDF/Image):</label>
-                <input type="file" id="addFile" style="background:#fff;">
+            <label>आवेदक का पूरा नाम:</label>
+            <input type="text" id="custName" placeholder="पूरा नाम दर्ज करें" required>
+
+            <label>मोबाइल नंबर:</label>
+            <input type="text" id="custMobile" placeholder="मोबाइल नंबर दर्ज करें" required>
+
+            <label>जीमेल (Email):</label>
+            <input type="text" id="custEmail" value="NA" placeholder="email@gmail.com">
+
+            <label id="extraLabelText">आवश्यक जानकारी / विवरण:</label>
+            <input type="text" id="extraInfo" placeholder="विवरण दर्ज करें" required>
+
+            <label>दस्तावेज / फाइल अपलोड करें:</label>
+            <input type="file" id="serviceFiles" accept=".pdf,.jpg,.jpeg,.png,.jfif" multiple required style="background:#f9f9f9; padding:5px;">
+
+            <div id="paymentSection" style="display:none;">
+                <hr style="border:0; border-top:1px dashed #ccc; margin:15px 0;">
+                <div style="text-align:center;">
+                    <p style="font-size:12px; font-weight:bold; color:#555; margin:5px 0;">नीचे दिए गए QR कोड को स्कैन करके भुगतान करें:</p>
+                    <img id="upiQrImg" src="" alt="UPI QR Code" style="width:160px; height:160px; border:1px solid #ddd; padding:4px; border-radius:5px;">
+                    <p style="font-size:11px; color:#666; margin:4px 0;">UPI ID: <b>Q508475385@ybl</b></p>
+                </div>
+                <label>UPI ट्रांजैक्शन / UTR नंबर दर्ज करें:</label>
+                <input type="text" id="utrNumber" placeholder="जैसे: 4321xxxxxxxx" style="background:#fffde7; font-weight:bold;">
             </div>
 
-            <div class="full-width">
-                <label>या एक्सटर्नल लिंक / URL (वैकल्पिक):</label>
-                <input type="text" id="addLink" placeholder="https://...">
-            </div>
-
-            <div class="full-width">
-                <button class="btn" style="background: #28a745;" onclick="addNewService()">नया कार्ड जोड़ें</button>
-            </div>
-        </div>
+            <button type="submit" class="btn-submit" id="submitBtnText">🚀 फॉर्म सबमिट करें</button>
+        </form>
+        <a href="#" class="btn-back" onclick="goHome(event)">⬅️ होम पेज पर जाएं</a>
     </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbyvPw32Gc1Qz8Qkr_POUAcnjLhJUJy8ej5DWoz39eiWETIEjCrz-I21qQjUgsX5Gt4O/exec";
-        const ADMIN_PASSWORD = "7615";
-        let logoutTimer = null;
 
-        // डिफ़ॉल्ट 11 स्कीमें (यदि गूगल शीट में न हों)
         const defaultServices = [
-            { title: "SELF PRINT", fees: 0, emoji: "📄", note: "इसमें आवेदक फाइलें अपलोड कर सकता है।" },
+            { title: "SELF PRINT", fees: 0, emoji: "📄", note: "इसमें आवेदक JPG, JPEG, PDF जैसी फाइलें upload कर सकता है।" },
             { title: "मूल निवास प्रमाण पत्र", fees: 0, emoji: "📜", note: "सभी दस्तावेज़ लेकर नजदीकी ई-मित्र पर संपर्क करें।" },
             { title: "जाति प्रमाण पत्र", fees: 0, emoji: "📑", note: "सभी दस्तावेज़ लेकर नजदीकी ई-मित्र पर संपर्क करें।" },
             { title: "PAN CARD", fees: 200, emoji: "💳", note: "आवेदक का आधार कार्ड, 10वीं मार्कशीट जरूरी है।" },
@@ -191,7 +151,6 @@
                 let data = await response.json();
                 
                 document.getElementById("noticeText").innerText = "📢 " + (data.notice || "स्वागत है!");
-                document.getElementById("adminNotice").value = data.notice || "";
                 document.getElementById("shopStatus").innerText = data.status === "ONLINE" ? "🟢 दुकान खुली है (ONLINE)" : "🔴 दुकान बंद है (OFFLINE)";
 
                 let container = document.getElementById("servicesContainer");
@@ -209,20 +168,10 @@
                             <p>${service.fees > 0 ? '₹' + service.fees : 'FREE'}</p>
                         </div>
                     `;
-                    card.onclick = () => {
-                        if(service.fileUrl) {
-                            window.open(service.fileUrl, "_blank");
-                        } else if(service.link) {
-                            window.open(service.link, "_blank");
-                        } else {
-                            alert(service.note || "यह सेवा उपलब्ध है।");
-                        }
-                    };
+                    card.onclick = () => openServiceForm(service);
                     container.appendChild(card);
                 });
             } catch (error) {
-                console.error("Error loading data:", error);
-                // यदि फेच में एरर आए तो डिफ़ॉल्ट 11 कार्ड्स दिखाएं
                 let container = document.getElementById("servicesContainer");
                 container.innerHTML = "";
                 defaultServices.forEach(service => {
@@ -235,105 +184,127 @@
                             <p>${service.fees > 0 ? '₹' + service.fees : 'FREE'}</p>
                         </div>
                     `;
-                    card.onclick = () => alert(service.note);
+                    card.onclick = () => openServiceForm(service);
                     container.appendChild(card);
                 });
             }
         }
 
-        function checkPassword() {
-            let pass = prompt("कृपया एडमिन पासवर्ड दर्ज करें:");
-            if (pass === ADMIN_PASSWORD) {
-                sessionStorage.setItem("isAdminLoggedIn", "true");
-                showAdminPanel();
-            } else if (pass !== null) {
-                alert("गलत पासवर्ड! एक्सेस अस्वीकृत।");
+        function openServiceForm(service) {
+            document.getElementById("homeContainer").style.display = "none";
+            let formView = document.getElementById("serviceFormView");
+            formView.style.display = "block";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            document.getElementById("formServiceTitle").innerText = (service.emoji || '📄') + " " + service.title;
+            document.getElementById("inputServiceType").value = service.title;
+            document.getElementById("inputAmount").value = service.fees || 0;
+
+            let noteBox = document.getElementById("formServiceNote");
+            if (service.note) {
+                noteBox.innerHTML = "<b>📌 निर्देश / जानकारी:</b> " + service.note;
+                noteBox.style.display = "block";
+            } else {
+                noteBox.style.display = "none";
+            }
+
+            let downloadSec = document.getElementById("formDownloadSection");
+            if (service.fileUrl) {
+                downloadSec.innerHTML = `<a href="${service.fileUrl}" target="_blank" style="display:block; background:#2980b9; color:white; text-align:center; padding:10px; font-weight:bold; border-radius:5px; text-decoration:none; margin-bottom:15px;">📥 फॉर्म / संबंधित फाइल डाउनलोड करें</a>`;
+            } else {
+                downloadSec.innerHTML = "";
+            }
+
+            let feeBox = document.getElementById("formFeeBox");
+            let paymentSec = document.getElementById("paymentSection");
+            let fees = parseInt(service.fees || 0);
+
+            if (fees > 0) {
+                feeBox.className = "fee-box";
+                feeBox.style.background = "#e8f5e9";
+                feeBox.style.color = "#2e7d32";
+                feeBox.innerText = "देय फीस (Fee): ₹" + fees;
+                
+                document.getElementById("upiQrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa=Q508475385@ybl&pn=BHUARKARKA%20SERVICES&am=${fees}&cu=INR`;
+                paymentSec.style.display = "block";
+                document.getElementById("utrNumber").required = true;
+                document.getElementById("submitBtnText").innerText = "🚀 भुगतान सत्यापित करें व फॉर्म जमा करें";
+            } else {
+                feeBox.className = "fee-box";
+                feeBox.style.background = "#e3f2fd";
+                feeBox.style.color = "#1565c0";
+                feeBox.innerText = "🎉 यह सेवा बिल्कुल मुफ़्त (FREE) है!";
+                paymentSec.style.display = "none";
+                document.getElementById("utrNumber").required = false;
+                document.getElementById("submitBtnText").innerText = "🚀 फ़ॉर्म सबमिट करें";
             }
         }
 
-        function showAdminPanel() {
-            let panel = document.getElementById("adminPanel");
-            panel.style.display = "block";
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-            
-            clearTimeout(logoutTimer);
-            logoutTimer = setTimeout(() => {
-                adminLogout();
-                alert("समय समाप्त (Session Timeout)! सुरक्षा की दृष्टि से एडमिन पैनल बंद कर दिया गया है।");
-            }, 5 * 60 * 1000);
-        }
-
-        function adminLogout() {
-            clearTimeout(logoutTimer);
-            sessionStorage.removeItem("isAdminLoggedIn");
-            let panel = document.getElementById("adminPanel");
-            panel.style.display = "none";
+        function goHome(e) {
+            e.preventDefault();
+            document.getElementById("serviceFormView").style.display = "none";
+            document.getElementById("homeContainer").style.display = "block";
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        async function updateSettings() {
-            let notice = document.getElementById("adminNotice").value;
-            let status = document.getElementById("adminStatus").value;
-            let url = `${API_URL}?action=updateSettings&notice=${encodeURIComponent(notice)}&status=${status}`;
-            
-            let res = await fetch(url);
-            let result = await res.json();
-            alert("सेटिंग्स अपडेट हो गई!");
-            loadData();
-        }
+        async function submitServiceForm(e) {
+            e.preventDefault();
+            let serviceType = document.getElementById("inputServiceType").value;
+            let amount = document.getElementById("inputAmount").value;
+            let custName = document.getElementById("custName").value;
+            let custMobile = document.getElementById("custMobile").value;
+            let custEmail = document.getElementById("custEmail").value;
+            let extraInfo = document.getElementById("extraInfo").value;
+            let utrNumber = document.getElementById("utrNumber").value || "FREE / NA";
+            let fileInput = document.getElementById("serviceFiles");
 
-        async function addNewService() {
-            let emoji = document.getElementById("addEmoji").value;
-            let title = document.getElementById("addTitle").value;
-            let fees = document.getElementById("addFees").value;
-            let link = document.getElementById("addLink").value;
-            let fileInput = document.getElementById("addFile");
-
-            if (!title) {
-                alert("कृपया कार्ड का टाइटल भरें!");
+            if (fileInput.files.length === 0) {
+                alert("कृपया कम से कम एक दस्तावेज अपलोड करें!");
                 return;
             }
 
-            if (fileInput.files.length > 0) {
-                let file = fileInput.files[0];
-                let reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = async function () {
-                    let base64Data = reader.result.split(',')[1];
-                    let payload = {
-                        action: "addServiceWithFile",
-                        emoji: emoji,
-                        title: title,
-                        fees: fees,
-                        fileName: file.name,
-                        fileData: base64Data,
-                        link: link
-                    };
-                    
-                    alert("फाइल अपलोड हो रही है, कृपया प्रतीक्षा करें...");
-                    let res = await fetch(API_URL, {
+            alert("डेटा और फाइलें अपलोड हो रही हैं, कृपया प्रतीक्षा करें...");
+
+            let file = fileInput.files[0];
+            let reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async function () {
+                let base64Data = reader.result.split(',')[1];
+                
+                let payload = {
+                    sheetName: "New",
+                    cust_name: custName,
+                    cust_mobile: custMobile,
+                    cust_email: custEmail,
+                    service_type: serviceType,
+                    amount: amount,
+                    filenames: `विवरण: ${extraInfo} | फाइल: ${file.name}`,
+                    fileData: base64Data,
+                    fileName: file.name,
+                    utr: utrNumber,
+                    status: "Pending (पेंडिंग)"
+                };
+
+                try {
+                    await fetch(API_URL, {
                         method: "POST",
                         body: JSON.stringify(payload)
                     });
-                    let result = await res.json();
-                    alert("नया सर्विस कार्ड और प्रपत्र सफलतापर्वक जुड़ गया!");
-                    location.reload();
-                };
-            } else {
-                let url = `${API_URL}?action=addService&emoji=${encodeURIComponent(emoji)}&title=${encodeURIComponent(title)}&fees=${fees}&link=${encodeURIComponent(link)}`;
-                let res = await fetch(url);
-                let result = await res.json();
-                alert("नया सर्विस कार्ड सफलतापूर्वक जुड़ गया!");
-                location.reload();
-            }
+
+                    document.getElementById("serviceFormView").innerHTML = `
+                        <div style="text-align:center; padding:20px;">
+                            <h2 style="color:#28a745;">✅ आवेदन सफलतापूर्वक जमा हो गया!</h2>
+                            <p style="font-size:14px; color:#333;">आपका डेटा और फाइलें सुरक्षित रूप से एडमिन पैनल तक पहुँच गई हैं।</p>
+                            <br><a href="index.html" style="display:inline-block; padding:10px 20px; background:#007BURL; color:white; text-decoration:none; border-radius:5px; font-weight:bold;">🏠 होम पेज पर जाएं</a>
+                        </div>
+                    `;
+                } catch (err) {
+                    alert("सबमिट करने में त्रुटि हुई। कृपया पुनरावृत्ति करें।");
+                }
+            };
         }
 
-        window.onload = function() {
-            loadData();
-            if (sessionStorage.getItem("isAdminLoggedIn") === "true") {
-                showAdminPanel();
-            }
-        };
+        window.onload = loadData;
     </script>
 </body>
 </html>
